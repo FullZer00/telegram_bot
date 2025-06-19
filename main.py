@@ -9,9 +9,9 @@ token = os.getenv('TELEGRAM_BOT_TOKEN')
 
 bot = telebot.TeleBot(token)
 
-@bot.message_handler(commands=['site, website'])
+@bot.message_handler(commands=['site', 'website'])
 def site(message):
-    webbrowser.open('')
+    webbrowser.open(os.getenv('GH_REPO'))
 
 @bot.message_handler(commands=['start'])
 def start(message):
