@@ -2,12 +2,11 @@ from telebot import types
 
 from commands.base_command import BaseCommand
 
-
 class UsersCommands(BaseCommand):
     def __init__(self, db_manager, bot):
         super().__init__(bot)
-        self.db = db_manager
-        self.name = None
+        self.__db = db_manager
+        self.__name = None
 
     def register(self):
         @self.bot.message_handler(commands=['register'])
@@ -26,14 +25,14 @@ class UsersCommands(BaseCommand):
             self.bot.send_message(message.chat.id, info)
 
     def user_name(self, message):
-        self.name = message.text.strip()
+        self.__name = message.text.strip()
         self.bot.send_message(message.chat.id, 'Введите пароль')
         self.bot.register_next_step_handler(message, self.user_pass)
 
     def user_pass(self, message):
         password = message.text.strip()
 
-        self.db.add_user(self.name, password)
+        self.__db.add_user(self.__name, password)
 
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("Список пользователей", callback_data='users'))
@@ -41,7 +40,7 @@ class UsersCommands(BaseCommand):
         # bot.register_next_step_handler(message, user_pass)
 
     def user_list(self):
-        users = self.db.get_all_users()
+        users = self.__db.get_all_users()
 
         return users
 
