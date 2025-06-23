@@ -10,19 +10,20 @@ class UsersCommands(BaseCommand):
         self.name = None
 
     def register(self):
-        @self.bot.message_handler(commands=['start'])
+        @self.bot.message_handler(commands=['register'])
         def start(message):
             self.bot.send_message(message.chat.id, 'Привет, сейчас тебя зарегистрируем. Введи свое имя.')
             self.bot.register_next_step_handler(message, self.user_name)
 
         @self.bot.callback_query_handler(func=lambda call: True)
         def callback(call):
-            users = self.user_list()
-            info = ''
-            for user in users:
-                info += f'Имя: {user[1]}\n'
-
+            info = self.users_info()
             self.bot.send_message(call.message.chat.id, info)
+
+        @self.bot.message_handler(commands=['users'])
+        def users(message):
+            info = self.users_info()
+            self.bot.send_message(message.chat.id, info)
 
     def user_name(self, message):
         self.name = message.text.strip()
@@ -43,3 +44,11 @@ class UsersCommands(BaseCommand):
         users = self.db.get_all_users()
 
         return users
+
+    def users_info(self):
+        users = self.user_list()
+        info = ''
+        for user in users:
+            info += f'Имя: {user[1]}\n'
+
+        return info
