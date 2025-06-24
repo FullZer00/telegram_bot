@@ -1,0 +1,2 @@
+class MoreThanZeroError(Exception):
+    pass

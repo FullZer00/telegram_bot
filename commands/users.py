@@ -9,24 +9,25 @@ class UsersCommands(BaseCommand):
         self.__name = None
 
     def register(self):
-        @self.bot.message_handler(commands=['register'])
-        def start(message):
-            self.bot.send_message(message.chat.id, 'Привет, сейчас тебя зарегистрируем. Введи свое имя.')
+        super().register()
+        @self.bot.message_handler(commands=['register'], func=lambda message: message.chat.id in self.bot_states)
+        def register(message):
+            self._bot_send_message(message.chat.id, 'Привет, сейчас тебя зарегистрируем. Введи свое имя')
             self.bot.register_next_step_handler(message, self.user_name)
 
-        @self.bot.callback_query_handler(func=lambda call: True)
+        @self.bot.callback_query_handler(func=lambda call: call.message.chat.id in self.bot_states)
         def callback(call):
             info = self.users_info()
             self.bot.send_message(call.message.chat.id, info)
 
-        @self.bot.message_handler(commands=['users'])
+        @self.bot.message_handler(commands=['users'], func=lambda message: message.chat.id in self.bot_states)
         def users(message):
             info = self.users_info()
-            self.bot.send_message(message.chat.id, info)
+            self._bot_send_message(message.chat.id, info)
 
     def user_name(self, message):
         self.__name = message.text.strip()
-        self.bot.send_message(message.chat.id, 'Введите пароль')
+        self._bot_send_message(message.chat.id, 'Введите пароль')
         self.bot.register_next_step_handler(message, self.user_pass)
 
     def user_pass(self, message):
@@ -36,7 +37,7 @@ class UsersCommands(BaseCommand):
 
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("Список пользователей", callback_data='users'))
-        self.bot.send_message(message.chat.id, 'Пользователь зарегистрирован', reply_markup=markup)
+        self._bot_send_message(message.chat.id, 'Пользователь зарегистрирован', reply_markup=markup)
         # bot.register_next_step_handler(message, user_pass)
 
     def user_list(self):
