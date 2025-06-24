@@ -3,6 +3,7 @@ import os
 import telebot
 from dotenv import load_dotenv
 
+from commands.currency import CurrencyCommands
 from commands.users import UsersCommands
 from commands.weather import WeatherCommands
 from database.database_manager import DatabaseManager
@@ -24,5 +25,8 @@ userCommands.register()
 
 weatherCommands = WeatherCommands(bot, name='weather')
 weatherCommands.register()
+
+currencyCommands = CurrencyCommands(bot, name='currency')
+currencyCommands.register()
 
 bot.infinity_polling()
