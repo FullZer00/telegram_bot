@@ -19,10 +19,10 @@ db_manager = DatabaseManager()
 def start(message):
     bot.send_message(message.chat.id, "Приветствую вас. Надеюсь я смогу вам как-то помочь)")
 
-userCommands = UsersCommands(db_manager, bot)
+userCommands = UsersCommands(db_manager, bot, name='user')
 userCommands.register()
 
-weatherCommands = WeatherCommands(bot)
+weatherCommands = WeatherCommands(bot, name='weather')
 weatherCommands.register()
 
 bot.infinity_polling()

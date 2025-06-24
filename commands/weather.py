@@ -2,35 +2,18 @@ import os
 
 from api.weather import WeatherApi
 from commands.base_command import BaseCommand
-from telebot import types
 
 
 class WeatherCommands(BaseCommand):
-    def __init__(self, bot):
-        super().__init__(bot)
+    def __init__(self, bot, name):
+        super().__init__(bot, name)
         self.weatherAPI = WeatherApi()
-        self.weather_states = set()
-        self.markup_exit = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-        self.markup_exit.add(types.KeyboardButton("/exit"))
+        self.start_message = "Введите название города:"
+        self.exit_message = "Выход из режима погоды"
 
     def register(self):
-        @self.bot.message_handler(commands=['weather'])
-        def weather(message):
-            self.weather_states.add(message.chat.id)
-            self.bot.send_message(message.chat.id, "Напиши название города", reply_markup=self.markup_exit)
-
-        @self.bot.message_handler(commands=['exit'])
-        def exit_weather(message):
-            chat_id = message.chat.id
-            if chat_id in self.weather_states:
-                self.weather_states.remove(chat_id)
-                self.bot.send_message(
-                    chat_id,
-                    "Режим погоды отменён",
-                    reply_markup=types.ReplyKeyboardRemove()
-                )
-
-        @self.bot.message_handler(func=lambda message: message.chat.id in self.weather_states)
+        super().register()
+        @self.bot.message_handler(func=lambda message: message.chat.id in self.bot_states)
         def get_weather(message):
             city = message.text.strip()
             try:

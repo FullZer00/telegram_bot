@@ -3,8 +3,8 @@ from telebot import types
 from commands.base_command import BaseCommand
 
 class UsersCommands(BaseCommand):
-    def __init__(self, db_manager, bot):
-        super().__init__(bot)
+    def __init__(self, db_manager, bot, name):
+        super().__init__(bot, name)
         self.__db = db_manager
         self.__name = None
 
