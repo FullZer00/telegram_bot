@@ -10,14 +10,14 @@ class WeatherCommands(BaseCommand):
         super().__init__(bot)
         self.weatherAPI = WeatherApi()
         self.weather_states = set()
+        self.markup_exit = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+        self.markup_exit.add(types.KeyboardButton("/exit"))
 
     def register(self):
         @self.bot.message_handler(commands=['weather'])
         def weather(message):
             self.weather_states.add(message.chat.id)
-            markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-            markup.add(types.KeyboardButton("/exit"))
-            self.bot.send_message(message.chat.id, "Напиши название города", reply_markup=markup)
+            self.bot.send_message(message.chat.id, "Напиши название города", reply_markup=self.markup_exit)
 
         @self.bot.message_handler(commands=['exit'])
         def exit_weather(message):
@@ -30,7 +30,7 @@ class WeatherCommands(BaseCommand):
                     reply_markup=types.ReplyKeyboardRemove()
                 )
 
-        @self.bot.message_handler(content_types=['text'])
+        @self.bot.message_handler(func=lambda message: message.chat.id in self.weather_states)
         def get_weather(message):
             city = message.text.strip()
             try:
@@ -42,16 +42,17 @@ class WeatherCommands(BaseCommand):
                         self.bot.send_photo(
                             chat_id=message.chat.id,
                             photo=img_file,
-                            caption=f'Погода в {city} сейчас: {data["main"]["temp"]}℃\n'
-                                    f'Минимум: {data["main"]["temp_min"]}℃\n'
-                                    f'Максимум: {data["main"]["temp_max"]}℃'
+                            caption=self._format_temp_message(city, data),
+                            reply_markup=self.markup_exit
                         )
                 else:
-                    self.bot.reply_to(message,
-                                      f'Погода в {city} сейчас: {data["main"]["temp"]}℃\n'
-                                      f'Минимум: {data["main"]["temp_min"]}℃\n'
-                                      f'Максимум: {data["main"]["temp_max"]}℃')
+                    self.bot.reply_to(message, self._format_temp_message(city, data))
 
             except Exception as e:
                 print(e)
                 self.bot.reply_to(message, f"Ошибка получения данных: {str(e)}")
+
+    def _format_temp_message(self, city, data):
+        return (f'Погода в {city} сейчас: {data["main"]["temp"]}℃\n'
+                f'Минимум: {data["main"]["temp_min"]}℃\n'
+                f'Максимум: {data["main"]["temp_max"]}℃')
